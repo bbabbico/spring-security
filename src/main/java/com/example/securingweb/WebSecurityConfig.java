@@ -17,13 +17,13 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception { //시큐리티 필터 설정
 		http
 			.authorizeHttpRequests((requests) -> requests
 				.requestMatchers("/", "/home").permitAll() // 보안 인증 제외 url
 				.anyRequest().authenticated()
 			)
-			.formLogin((form) -> form
+			.formLogin((form) -> form //로그인 페이지 매핑
 				.loginPage("/login")
 				.permitAll()
 			)
