@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member,Long> {
     Optional<Member> findByLoginId(String id);
     Optional<Member> findByEmail(String email);
-    Optional<Member> findByUsername(String username);
+    Optional<Member> findByName(String name);
     
     // 중복 확인 메서드
     boolean existsByEmail(String email);
