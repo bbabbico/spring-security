@@ -25,14 +25,15 @@ public class JoinService {
         Member data = new Member();
 
         String Password = passwordEncoder.encode(joinDTO.getPassword());
-        String Username = joinDTO.getUsername();
-        log.info( "사용자명 : "+Username+"\n비밀번호 : "+Password);
+        String Name = joinDTO.getName();
+        String LoginId = joinDTO.getLoginId();
+        log.info( "\nID : "+LoginId+"\n사용자명 : "+Name+"\n비밀번호 : "+Password +"\n회원가입됨");
 
-        data.setName(Username);
+        data.setName(Name);
         data.setPassword(Password);
-        data.setEmail("eeewqd@ddqe");
-        data.setLoginId(joinDTO.getUsername());
-//        data.setRole("ROLE_USER");
+        data.setEmail(joinDTO.getEmail());
+        data.setLoginId(LoginId);
+//        data.setRole("ROLE_USER"); 
 
 
         userRepository.save(data);

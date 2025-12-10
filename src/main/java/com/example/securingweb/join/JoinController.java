@@ -13,7 +13,7 @@ public class JoinController {
 
 
     @GetMapping("/join")
-    public String joinP() {
+    public String join() {
 
         return "join";
     }
@@ -21,8 +21,6 @@ public class JoinController {
 
     @PostMapping("/join")
     public String joinProcess(JoinDTO joinDTO) {
-
-        System.out.println(joinDTO.getUsername());
 
         joinService.joinProcess(joinDTO);
 
