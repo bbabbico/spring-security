@@ -30,7 +30,7 @@ public class Member {
     @Column(length = 20 , nullable = false)
     private String name;     //사용자 이름
 
-    @Column(length = 40 , nullable = false)
+    @Column(length = 61 , nullable = false) // BCryptPasswordEncoder
     private String password; //비밀번호
 
     @Override
