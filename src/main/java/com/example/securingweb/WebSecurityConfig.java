@@ -28,7 +28,9 @@ public class WebSecurityConfig {
 //					.loginProcessingUrl("/login") 로그인 서비스를 실행할 url - 이 url로 로그인 폼을 보내면 시큐리티가 받아서 인증/인가 과정이 시작됨. 기본값으로 /login 로 되어있음.
 //					.defaultSuccessUrl("/") 로그인 성공시 / 페이지로 리다이렉트
 							.permitAll() //모든 사용자 접근 허용
-			).logout((logout) -> logout.permitAll());
+			).logout((logout) -> logout.permitAll()); //뒤에 permitAll 붙여서 requestMachers 에 url 추가 안해도됨.
+			//logout.logoutUrl("/my/logout/uri") logout.logoutSuccessUrl("/my/success/endpoint") 로그아웃 엔드포인트 지정
+
 		
 		http
 				.sessionManagement((auth) -> auth //세션 설정
