@@ -24,7 +24,9 @@ public class MemberUserDetails implements UserDetails {
         return collection;
     }
 
-    public Member getMember() {return member;} //실험용
+    public Member getMember() {return member;} //실험용 서비스 로직에서 Member 객체를 사용할 일이 있을때만 사용
+
+    public String getEmail() {return member.getEmail();}
 
     @Override
     public String getPassword() {
