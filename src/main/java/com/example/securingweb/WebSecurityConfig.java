@@ -46,7 +46,7 @@ public class WebSecurityConfig {
 	}
 
 	@Bean
-	public PasswordEncoder passwordEncoder() {
+	public PasswordEncoder passwordEncoder() { // 시큐리티에서 사용할 비밀번호 인코더, 회원가입 로그인 둘다 동일한 포맷을 사용해야 됨. AuthenticationManager 가 내부적으로 회원 인증을 할때 사용하므로 무조건 있어야함.
 		return new BCryptPasswordEncoder();
 	}
 
