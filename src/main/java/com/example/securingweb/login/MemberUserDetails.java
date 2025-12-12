@@ -19,7 +19,7 @@ public class MemberUserDetails implements UserDetails {
 
         Collection<GrantedAuthority> collection = new ArrayList<>();
 
-        collection.add((GrantedAuthority) () -> "ROLE_USER");
+        collection.add((GrantedAuthority) () -> "ROLE_"+member.getRole());
 
         return collection;
     }

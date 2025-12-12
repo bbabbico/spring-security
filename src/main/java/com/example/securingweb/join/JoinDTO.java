@@ -11,4 +11,5 @@ public class JoinDTO {
     private String loginId;
     private String name;
     private String password;
+    private String role;
 }

@@ -33,7 +33,7 @@ public class JoinService {
         data.setPassword(Password);
         data.setEmail(joinDTO.getEmail());
         data.setLoginId(LoginId);
-//        data.setRole("ROLE_USER"); 
+        data.setRole("USER"); //그외 계정은 DB에서 직접 주입
 
 
         userRepository.save(data);

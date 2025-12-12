@@ -33,6 +33,9 @@ public class Member {
     @Column(length = 61 , nullable = false) // BCryptPasswordEncoder
     private String password; //비밀번호
 
+    @Column(length = 10 , nullable = false)
+    private String role;
+
     @Override
     public String toString() {
         return "Member{" +
@@ -41,6 +44,7 @@ public class Member {
                 ", loginId='" + loginId + '\'' +
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
+                ", role='" + role + '\'' +
                 '}';
     }
 }
