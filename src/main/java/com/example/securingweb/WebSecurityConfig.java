@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
+
 @Configuration
 @EnableWebSecurity //스프링 시큐리티 관리선언
 public class WebSecurityConfig {
@@ -19,37 +20,23 @@ public class WebSecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception { //시큐리티 필터 설정
 		http
-			.authorizeHttpRequests((requests) -> requests //authorizeHttpRequests HTTP 요청에 대한 시큐리티 설정 
-				.requestMatchers("/", "/home","/login","/join").permitAll() // 보안 인증 제외 url  //hasRole() 특정 Role만 허용 // .requestMatchers("/my/**").hasAnyRole("ADMIN", "USER") 처럼 여러 Role 허용
+			.authorizeHttpRequests((requests) -> requests 									//authorizeHttpRequests HTTP 요청에 대한 시큐리티 설정
+				.requestMatchers("/", "/home","/login","/join").permitAll() 									// 보안 인증 제외 url  //hasRole() 특정 Role만 허용 // .requestMatchers("/my/**").hasAnyRole("ADMIN", "USER") 처럼 여러 Role 허용
 					.requestMatchers("/admin").hasRole("LOOT")
-					.anyRequest().authenticated() //anyRequest - requestMatchers 로 설정하지 않은 다른 접근에 대한 설정. //authenticated 로그인된 사용자만 접근 허용
+					.anyRequest().authenticated() 																		//anyRequest - requestMatchers 로 설정하지 않은 다른 접근에 대한 설정. //authenticated 로그인된 사용자만 접근 허용
 			)
-			.formLogin((form) -> form //로그인 페이지 매핑
-				.loginPage("/login") //로그인 페이지 templates/ 경로로 지정
+			.formLogin((form) -> form 														//로그인 페이지 매핑
+				.loginPage("/login") 																					//로그인 페이지 templates/ 경로로 지정
 //					.loginProcessingUrl("/login") 로그인 서비스를 실행할 url - 이 url로 로그인 폼을 보내면 시큐리티가 받아서 인증/인가 과정이 시작됨. 기본값으로 /login 로 되어있음.
 					.defaultSuccessUrl("/hello") //로그인 성공시 / 페이지로 리다이렉트
 							.permitAll() //모든 사용자 접근 허용
-			).logout((logout) -> logout.permitAll()); //뒤에 permitAll 붙여서 requestMachers 에 url 추가 안해도됨.
-			//logout.logoutUrl("/my/logout/uri") logout.logoutSuccessUrl("/my/success/endpoint") 로그아웃 엔드포인트 지정
-
-		http.exceptionHandling(ex -> ex //에러 발생시 설정
-//				.accessDeniedPage("/denied")  // 권한 부족시 이 URL로
-				.accessDeniedHandler(customAccessDeniedHandler())
-		);
-
-		http
-				.sessionManagement((auth) -> auth //세션 설정
-						.maximumSessions(1) //하나의 아이디에 대한 다중 로그인 허용 개수
-						.maxSessionsPreventsLogin(true)); //다중 로그인 허용 개수 초과시 처리 방법 // true : 새로운 로그인 차단 // false : 기존 세션 하나 삭제
-
-		http
-				.sessionManagement((auth) -> auth //세션 고정 공격 보호
-						.sessionFixation()
-						.none()); //로그인 시 세션 정보 변경 안함
-						//.newSession()); //로그인 시 세션 새로 생성
-						//.changeSessionId()); //로그인 시 동일한 세션에 대한 id 변경
-
-
+			).logout((logout) -> logout.permitAll()) 											//뒤에 permitAll 붙여서 requestMachers 에 url 추가 안해도됨.
+						//logout.logoutUrl("/my/logout/uri") logout.logoutSuccessUrl("/my/success/endpoint") 로그아웃 엔드포인트 지정
+				.exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler()))
+				.sessionManagement(sm -> sm 										//세션 설정
+						.maximumSessions(1) 																			//하나의 아이디에 대한 다중 로그인 허용 개수
+						.maxSessionsPreventsLogin(true) 																//다중 로그인 허용 개수 초과시 처리 방법 // true : 새로운 로그인 차단 // false : 기존 세션 하나 삭제
+				);
 
 		return http.build();
 	}

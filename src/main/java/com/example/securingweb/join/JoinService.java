@@ -2,6 +2,7 @@ package com.example.securingweb.join;
 
 import com.example.securingweb.member.Member;
 import com.example.securingweb.member.MemberRepository;
+import com.example.securingweb.member.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +34,7 @@ public class JoinService {
         data.setPassword(Password);
         data.setEmail(joinDTO.getEmail());
         data.setLoginId(LoginId);
-        data.setRole("USER"); //그외 계정은 DB에서 직접 주입
+        data.setRole(Role.USER); //그외 계정은 DB에서 직접 주입
 
 
         userRepository.save(data);

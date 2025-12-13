@@ -34,7 +34,7 @@ public class Member {
     private String password; //비밀번호
 
     @Column(length = 10 , nullable = false)
-    private String role;
+    private Role role;
 
     @Override
     public String toString() {
