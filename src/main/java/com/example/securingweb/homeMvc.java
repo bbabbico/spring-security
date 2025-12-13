@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,10 +44,26 @@ public class homeMvc {
         model.addAttribute("role", role);
         return "home";
     }
+    // 폼방식
+//    @GetMapping("/hello")
+//    public String hello(@AuthenticationPrincipal MemberUserDetails user ,Model model) { //@AuthenticationPrincipal authentication 를 꺼내와서 객체에 맞게 매핑해줌. 근데 이건 폼방식 일때만 허용, JWT 방식은 user에 무조건 토큰만 넘어옴
+//        Member member = memberRepository.findByLoginId(user.getMember().getLoginId()).get();
+//        model.addAttribute("member", member);
+//        return "hello";
+//    }
+    
+    //JWT 방식
     @GetMapping("/hello")
-    public String hello(@AuthenticationPrincipal MemberUserDetails user ,Model model) { //@AuthenticationPrincipal authentication 를 꺼내와서 객체에 맞게 매핑해줌.
-        Member member = memberRepository.findByLoginId(user.getMember().getLoginId()).get();
+    public String hello(@AuthenticationPrincipal Jwt jwt, Model model) {
+        String loginId = jwt.getSubject(); // claims.subject(auth.getName())
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow();
         model.addAttribute("member", member);
         return "hello";
+    }
+
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 }

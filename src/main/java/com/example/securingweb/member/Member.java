@@ -33,6 +33,7 @@ public class Member {
     @Column(length = 61 , nullable = false) // BCryptPasswordEncoder
     private String password; //비밀번호
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 10 , nullable = false)
     private Role role;
 
