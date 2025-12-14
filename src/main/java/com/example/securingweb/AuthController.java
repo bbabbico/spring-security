@@ -33,6 +33,7 @@ public class AuthController {
     public void login(@RequestParam String username,
                                @RequestParam String password,
                                HttpServletResponse response) throws IOException {
+
         // 1) 아이디/비번 인증 (내부적으로 ProviderManager/DaoAuthenticationProvider 등 사용)
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
@@ -40,7 +41,8 @@ public class AuthController {
 
         // 2) JWT 클레임 구성
         Instant now = Instant.now(); //절대 시간 반환
-        List<String> roles = auth.getAuthorities().stream()
+        
+        List<String> roles = auth.getAuthorities().stream() //ROLE 추출
                 .map(GrantedAuthority::getAuthority)
                 .map(a -> a.startsWith("ROLE_") ? a.substring(5) : a) // "LOOT" 형태로 저장
                 .toList();

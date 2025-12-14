@@ -94,17 +94,17 @@ public class WebSecurityConfig {
 						.anyRequest().authenticated()
 				)
 
-				// ✅ Bearer 토큰 검증 파이프라인: BearerTokenAuthenticationFilter → JwtDecoder… :contentReference[oaicite:3]{index=3}
+				//  Bearer 토큰 검증 파이프라인: BearerTokenAuthenticationFilter → JwtDecoder
 				.oauth2ResourceServer(oauth2 -> oauth2
 						.bearerTokenResolver(bearerTokenResolver())
 						.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
 				)
 
-				// ✅ 401/403 메시지 처리 (Bearer는 EntryPoint가 WWW-Authenticate도 세팅 가능) :contentReference[oaicite:4]{index=4}
+				//  401/403 메시지 처리 (Bearer는 EntryPoint가 WWW-Authenticate도 세팅 가능)
 				.exceptionHandling(ex -> ex
-						// ✅ 로그인 안 했으면 로그인 페이지로
+						//  로그인 안 했으면 로그인 페이지로
 						.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
-						// ✅ 로그인은 했는데 권한 없으면 403 → error/403.html로 보여주기
+						//  로그인은 했는데 권한 없으면 403 → error/403.html로 보여주기
 						.accessDeniedHandler((req, res, e) -> res.sendError(403))
 						.accessDeniedHandler(customAccessDeniedHandler())
 				);
@@ -126,7 +126,7 @@ public class WebSecurityConfig {
 		return http.build();
 	}
 
-	// ✅ 로그인에서 AuthenticationManager를 직접 쓰기 위해 꺼내오는 방식
+	//  로그인에서 AuthenticationManager를 직접 쓰기 위해 꺼내오는 방식
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 		return config.getAuthenticationManager();
