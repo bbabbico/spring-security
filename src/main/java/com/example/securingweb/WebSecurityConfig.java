@@ -1,10 +1,15 @@
 package com.example.securingweb;
 
+import com.example.securingweb.member.MemberRepository;
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,10 +20,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
@@ -27,10 +35,16 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 
+@Slf4j
 @Configuration
 @EnableWebSecurity //스프링 시큐리티 관리선언
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
 	/** 폼 방식
@@ -77,10 +91,31 @@ public class WebSecurityConfig {
 		};
 	}
 	**/
-	
+
+
+
+
+	// OAuth 소셜 로그인 github
+	@Bean
+	@Order(1)
+	public SecurityFilterChain securityFilterChainOAuth(HttpSecurity http , OAuth2JwtSuccessHandler oAuth2JwtSuccessHandler) throws Exception {
+        http.securityMatcher("/oauth2/**", "/login/oauth2/**") //로그인 요청 허용
+				.authorizeHttpRequests(a -> a.anyRequest().permitAll())
+				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+				.csrf(AbstractHttpConfigurer::disable)
+				.oauth2Login(o -> o
+						.loginPage("/login")
+						.userInfoEndpoint(u -> u.userService(githubOAuth2UserService())) // OAuth2 로그인 성공 이후 사용자 정보를 가져올 때의 설정
+						.successHandler(oAuth2JwtSuccessHandler) // 로그인 성공 → JWT 쿠키 발급
+				);
+		return http.build();
+
+	}
+
 	// JWT 방식
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	@Order(2)
+	public SecurityFilterChain securityFilterChainJWT(HttpSecurity http) throws Exception {
 
 		http
 				// JWT면 보통 세션을 안 씀 (기존 maximumSessions/sessionFixation은 의미 없어짐)
@@ -88,8 +123,7 @@ public class WebSecurityConfig {
 				.csrf(AbstractHttpConfigurer::disable) //CSRF 미사용
 
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/", "/home", "/join", "/login").permitAll()
-						.requestMatchers("/api/auth/login").permitAll()
+						.requestMatchers("/", "/home", "/join", "/login","/favicon.ico").permitAll()
 						.requestMatchers("/admin").hasRole("LOOT")
 						.anyRequest().authenticated()
 				)
@@ -136,21 +170,21 @@ public class WebSecurityConfig {
 
 	@Bean
 	public SecretKey jwtSecretKey(@Value("${jwt.secret}") String base64Secret) {
-		byte[] keyBytes = java.util.Base64.getDecoder().decode(base64Secret);
-		return new javax.crypto.spec.SecretKeySpec(keyBytes, "HmacSHA256");
+		byte[] keyBytes = Base64.getDecoder().decode(base64Secret);
+		return new SecretKeySpec(keyBytes, "HmacSHA256");
 	}
 
 	// NimbusJwtEncoder: JWT “발급” (서명해서 compact JWT 생성)
 	@Bean
 	public JwtEncoder jwtEncoder(SecretKey secretKey) {
-		return new NimbusJwtEncoder(new com.nimbusds.jose.jwk.source.ImmutableSecret<>(secretKey));
+		return new NimbusJwtEncoder(new ImmutableSecret<>(secretKey));
 	}
 
 	// NimbusJwtDecoder: JWT “검증” (서명/클레임 검사 후 Jwt로 decode)
 	@Bean
 	public JwtDecoder jwtDecoder(SecretKey secretKey) {
 		return NimbusJwtDecoder.withSecretKey(secretKey)
-				.macAlgorithm(org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256)
+				.macAlgorithm(MacAlgorithm.HS256)
 				.build();
 	}
 
@@ -197,6 +231,30 @@ public class WebSecurityConfig {
 				}
 			}
 			return null;
+		};
+	}
+
+	@Bean
+	public OAuth2UserService<OAuth2UserRequest, OAuth2User> githubOAuth2UserService() {
+		DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+
+		return userRequest -> {
+			OAuth2User user = delegate.loadUser(userRequest);
+			Map<String, Object> attrs = new HashMap<>(user.getAttributes());
+
+			if (attrs.get("email") == null) {
+				String accessToken = userRequest.getAccessToken().getTokenValue();
+				log.info("이메일 null임");
+
+				// /user/emails 호출해서 primary email 뽑기 (WebClient/RestClient 아무거나 OK)
+				// (구현 디테일은 프로젝트 스타일에 맞추면 됨)
+			}
+
+			// name이 null이면 login으로 대체
+			if (attrs.get("name") == null) attrs.put("name", attrs.get("login"));
+
+			// GitHub는 user-name-attribute로 어떤 키를 "name"으로 쓸지 정함(보통 login/id 중 선택)
+			return new DefaultOAuth2User(user.getAuthorities(), attrs, "login");
 		};
 	}
 }
