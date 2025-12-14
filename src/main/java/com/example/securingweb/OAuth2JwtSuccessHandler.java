@@ -25,7 +25,7 @@ public class OAuth2JwtSuccessHandler implements AuthenticationSuccessHandler {
     private final MemberRepository memberRepository;
     private final JwtService jwtService;
 
-    @Override
+    @Override // JWT 생성
     public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse res, Authentication auth) throws IOException {
 
         OAuth2User oAuth2User = (OAuth2User) auth.getPrincipal();
@@ -64,7 +64,7 @@ public class OAuth2JwtSuccessHandler implements AuthenticationSuccessHandler {
         member.setEmail(email);
         member.setName(name);
 
-        // 혹시 기존 데이터에 loginId/role/password가 비어있을 수 있으면 보정(안전장치)
+        // 기존 데이터에 loginId/role/password가 비어있으면 다시 저장
         if (member.getLoginId() == null || member.getLoginId().isBlank()) {
             member.setLoginId(loginId);
         }
@@ -72,12 +72,12 @@ public class OAuth2JwtSuccessHandler implements AuthenticationSuccessHandler {
             member.setRole(Role.USER);
         }
         if (member.getPassword() == null || member.getPassword().isBlank()) {
-            member.setPassword("github+"+name);
+            member.setPassword("github+"+name); // 폼 로그인으로는 DB 에 저장된 github 계정 로그인 불가
         }
 
         memberRepository.save(member);
 
-        // 3) 우리 JWT 발급을 위해 "ROLE_USER" 권한을 가진 Authentication을 하나 만들어 JwtService에 전달
+        // 3) JWT 발급을 위해 "ROLE_USER" 권한을 가진 Authentication을 하나 만들어 JwtService에 전달 (JwtService 가 Authentication 을 파라미터로 받음)
         List<GrantedAuthority> authorities =
                 List.of(new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
 

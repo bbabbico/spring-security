@@ -1,6 +1,5 @@
 package com.example.securingweb;
 
-import com.example.securingweb.member.MemberRepository;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -240,14 +239,13 @@ public class WebSecurityConfig {
 
 		return userRequest -> {
 			OAuth2User user = delegate.loadUser(userRequest);
-			Map<String, Object> attrs = new HashMap<>(user.getAttributes());
+			Map<String, Object> attrs = new HashMap<>(user.getAttributes()); // 깃헙/user 해서 날라온 유저 데이터 저장
 
 			if (attrs.get("email") == null) {
-				String accessToken = userRequest.getAccessToken().getTokenValue();
+				//String accessToken = userRequest.getAccessToken().getTokenValue(); //이메일 없으면 다른걸로 대체하는거 구현필요
 				log.info("이메일 null임");
 
 				// /user/emails 호출해서 primary email 뽑기 (WebClient/RestClient 아무거나 OK)
-				// (구현 디테일은 프로젝트 스타일에 맞추면 됨)
 			}
 
 			// name이 null이면 login으로 대체
