@@ -96,7 +96,7 @@ public class WebSecurityConfig {
 
 
 	// OAuth 소셜 로그인 github
-	@Bean
+	@Bean //일반적으로 소셜 로그인은 한번 회원가입 하면 다음부터 로그인할때 소셜 쪽에서 자동으로 로그인 인증해줌.
 	@Order(1)
 	public SecurityFilterChain securityFilterChainOAuth(HttpSecurity http , OAuth2JwtSuccessHandler oAuth2JwtSuccessHandler) throws Exception {
         http.securityMatcher("/oauth2/**", "/login/oauth2/**") //로그인 요청 허용
