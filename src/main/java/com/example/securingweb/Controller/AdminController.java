@@ -1,4 +1,4 @@
-package com.example.securingweb;
+package com.example.securingweb.Controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

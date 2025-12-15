@@ -1,6 +1,5 @@
-package com.example.securingweb;
+package com.example.securingweb.Controller;
 
-import com.example.securingweb.login.MemberUserDetails;
 import com.example.securingweb.member.Member;
 import com.example.securingweb.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,7 @@ import java.util.Iterator;
 
 @RequiredArgsConstructor
 @Controller
-public class homeMvc {
+public class IndexController {
 
     private final MemberRepository memberRepository;
 
@@ -59,11 +58,5 @@ public class homeMvc {
         Member member = memberRepository.findByLoginId(loginId).orElseThrow();
         model.addAttribute("member", member);
         return "hello";
-    }
-
-
-    @GetMapping("/login")
-    public String login() {
-        return "login";
     }
 }

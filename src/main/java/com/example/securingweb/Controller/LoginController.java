@@ -1,5 +1,6 @@
-package com.example.securingweb;
+package com.example.securingweb.Controller;
 
+import com.example.securingweb.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -13,10 +14,15 @@ import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-public class AuthController {
+public class LoginController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void login(@RequestParam String username,
